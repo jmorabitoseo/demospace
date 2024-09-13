@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis Product Review Block Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .review-block {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .star-rating {
+            font-size: 24px;
+            color: #ffd700;
+        }
+        .aspect-rating {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cannabis Product Review Block Generator</h1>
+    <div id="input-form">
+        <h2>Enter Product Details</h2>
+        <label for="product-name">Product Name:</label>
+        <input type="text" id="product-name" required><br><br>
+        
+        <h3>Aspect Ratings</h3>
+        <div id="aspect-ratings">
+            <div>
+                <label for="aspect-1">Aroma:</label>
+                <input type="number" id="aspect-1" min="0" max="5" step="0.5" required>
+            </div>
+        </div>
+        <button onclick="addAspect()">Add Aspect</button><br><br>
+        
+        <button onclick="generateReviewBlock()">Generate Review Block</button>
+    </div>
+
+    <div id="output" class="review-block"></div>
+
+    <textarea id="generated-code" rows="10" cols="80" style="display: none;"></textarea>
+
+    <script>
+        let aspectCount = 1;
+
+        function addAspect() {
+            aspectCount++;
+            const newAspect = document.createElement('div');
+            newAspect.innerHTML = `
+                <label for="aspect-${aspectCount}">Aspect ${aspectCount}:</label>
+                <input type="text" id="aspect-${aspectCount}-name" placeholder="Aspect name" required>
+                <input type="number" id="aspect-${aspectCount}" min="0" max="5" step="0.5" required>
+            `;
+            document.getElementById('aspect-ratings').appendChild(newAspect);
+        }
+
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+            const emptyStars = 5 - fullStars - halfStar;
+            
+            return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
+        }
+
+        function generateReviewBlock() {
+            const productName = document.getElementById('product-name').value;
+            let aspectRatings = [];
+            let totalRating = 0;
+
+            for (let i = 1; i <= aspectCount; i++) {
+                const aspectName = i === 1 ? 'Aroma' : document.getElementById(`aspect-${i}-name`).value;
+                const aspectRating = parseFloat(document.getElementById(`aspect-${i}`).value);
+                aspectRatings.push({ name: aspectName, rating: aspectRating });
+                totalRating += aspectRating;
+            }
+
+            const averageRating = totalRating / aspectCount;
+
+            let html = `
+                <div class="review-block">
+                    <h2>${productName}</h2>
+                    <div class="star-rating">${generateStars(averageRating)} (${averageRating.toFixed(1)})</div>
+                    <h3>Aspect Ratings:</h3>
+            `;
+
+            for (const aspect of aspectRatings) {
+                html += `
+                    <div class="aspect-rating">
+                        <strong>${aspect.name}:</strong> 
+                        <span class="star-rating">${generateStars(aspect.rating)}</span> (${aspect.rating})
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+
+            document.getElementById('output').innerHTML = html;
+            document.getElementById('generated-code').value = html;
+            document.getElementById('generated-code').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
